@@ -1,0 +1,8 @@
+bin
+etc
+share
+lib
+include
+.idea
+__pycache__
+*.pyc

@@ -1,0 +1,8 @@
+tensorflow==1.15
+tensorflow_datasets
+Cython
+contextlib2
+pillow
+lxml
+jupyter
+matplotlib
