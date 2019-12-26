@@ -3,6 +3,7 @@ import argparse
 import json
 import sys
 import os
+from PIL import Image
 
 from object_detection.utils import dataset_util
 
@@ -10,31 +11,35 @@ flags = tf.app.flags
 flags.DEFINE_string('input_json', '', 'Path to feed.json')
 flags.DEFINE_string('output_path', '', 'Path to output TFRecord')
 flags.DEFINE_integer('limit', None, 'Number of dataset instances to create')
+
 FLAGS = flags.FLAGS
 
 
-def parse_function(filename, height, width):
-    image_string = tf.read_file(filename)
+def read_image(filename):
+    image = Image.open(filename)
+    width, height = image.size
 
-    #Don't use tf.image.decode_image, or the output shape will be undefined
-    image = tf.image.decode_jpeg(image_string, channels=3)
-    #This will convert to float values in [0, 1]
-    image = tf.image.convert_image_dtype(image, tf.float32)
 
-    resized_image = tf.image.resize_images(image, [height, width])
-    return resized_image
+    # # Don't use tf.image.decode_image, or the output shape will be undefined
+    # image = tf.image.decode_jpeg(image_string, channels=3)
+    # # This will convert to float values in [0, 1]
+    # image = tf.image.convert_image_dtype(image, tf.float32)
+
+    # resized_image = tf.image.resize_images(image, [height, width])
+    with tf.io.gfile.GFile (filename, 'rb') as fid:
+        encoded_jpg = fid.read()
+
+    return encoded_jpg, height, width
 
 
 def create_tf_example(dataset_dir, obj):
-    image_name = obj['image']
-    full_image_path = os.path.join(dataset_dir, image_name)
+    image_path = obj['image']
 
     # TODO(user): Populate the following variables from your example.
-    height = None  # Image height
-    width = None  # Image width
-    filename = None  # Filename of the image. Empty if image is not from file
-    encoded_image_data = None  # Encoded image bytes
-    image_format = None  # b'jpeg' or b'png'
+    full_image_path = os.path.join(dataset_dir, image_path)  # Filename of the image. Empty if image is not from file
+    encoded_image_data,height, width = read_image(full_image_path)  # Encoded image bytes
+    filename = os.path.basename(full_image_path).encode()
+    image_format = b'jpeg'  # b'jpeg' or b'png'
 
     xmins = []  # List of normalized left x coordinates in bounding box (1 per box)
     xmaxs = []  # List of normalized right x coordinates in bounding box
@@ -63,7 +68,6 @@ def create_tf_example(dataset_dir, obj):
 
 
 def main(_):
-
     writer = tf.io.TFRecordWriter(FLAGS.output_path)
     limit = FLAGS.limit
     # TODO(user): Write code to read in your dataset to examples variable
@@ -80,13 +84,7 @@ def main(_):
                 break
 
     writer.close()
-    #
-    # for example in examples:
-    #     tf_example = create_tf_example(example)
-    #     writer.write(tf_example.SerializeToString())
-    #
-    # writer.close()
 
 
 if __name__ == '__main__':
-    tf.app.run()
+    tf.compat.v1.app.run()
