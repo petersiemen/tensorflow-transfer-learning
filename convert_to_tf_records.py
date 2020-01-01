@@ -41,14 +41,14 @@ def create_tf_example(dataset_dir, obj):
     filename = os.path.basename(full_image_path).encode()
     image_format = b'jpeg'  # b'jpeg' or b'png'
 
-    xmins = []  # List of normalized left x coordinates in bounding box (1 per box)
-    xmaxs = []  # List of normalized right x coordinates in bounding box
+    xmins = [1.0]  # List of normalized left x coordinates in bounding box (1 per box)
+    xmaxs = [1.0]  # List of normalized right x coordinates in bounding box
     # (1 per box)
-    ymins = []  # List of normalized top y coordinates in bounding box (1 per box)
-    ymaxs = []  # List of normalized bottom y coordinates in bounding box
+    ymins = [1.0]  # List of normalized top y coordinates in bounding box (1 per box)
+    ymaxs = [1.0]  # List of normalized bottom y coordinates in bounding box
     # (1 per box)
-    classes_text = []  # List of string class name of bounding box (1 per box)
-    classes = []  # List of integer class id of bounding box (1 per box)
+    classes_text = ['BMW'.encode()]  # List of string class name of bounding box (1 per box)
+    classes = [1]  # List of integer class id of bounding box (1 per box)
 
     tf_example = tf.train.Example(features=tf.train.Features(feature={
         'image/height': dataset_util.int64_feature(height),

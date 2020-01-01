@@ -1,6 +1,8 @@
 import tensorflow as tf
 import IPython.display as display
 tf.enable_eager_execution()
+import matplotlib.pyplot as plt
+from PIL import Image
 
 raw_image_dataset = tf.data.TFRecordDataset('images.tfrecords')
 
@@ -8,15 +10,15 @@ raw_image_dataset = tf.data.TFRecordDataset('images.tfrecords')
 image_feature_description = {
     'image/height': tf.io.FixedLenFeature([], tf.int64),
     'image/width': tf.io.FixedLenFeature([], tf.int64),
-    'image/filename': tf.io.FixedLenFeature([], tf.int64),
-    'image/source_id': tf.io.FixedLenFeature([], tf.int64),
+    'image/filename': tf.io.FixedLenFeature([], tf.string),
+    'image/source_id': tf.io.FixedLenFeature([], tf.string),
     'image/encoded': tf.io.FixedLenFeature([], tf.string),
-    'image/format': tf.io.FixedLenFeature([], tf.int64),
-    'image/object/bbox/xmin': tf.io.FixedLenFeature([], tf.int64),
-    'image/object/bbox/xmax': tf.io.FixedLenFeature([], tf.int64),
-    'image/object/bbox/ymin': tf.io.FixedLenFeature([], tf.int64),
-    'image/object/bbox/ymax': tf.io.FixedLenFeature([], tf.int64),
-    'image/object/class/text': tf.io.FixedLenFeature([], tf.int64),
+    'image/format': tf.io.FixedLenFeature([], tf.string),
+    'image/object/bbox/xmin': tf.io.FixedLenFeature([], tf.float32),
+    'image/object/bbox/xmax': tf.io.FixedLenFeature([], tf.float32),
+    'image/object/bbox/ymin': tf.io.FixedLenFeature([], tf.float32),
+    'image/object/bbox/ymax': tf.io.FixedLenFeature([], tf.float32),
+    'image/object/class/text': tf.io.FixedLenFeature([], tf.string),
     'image/object/class/label': tf.io.FixedLenFeature([], tf.int64),
 }
 
@@ -30,4 +32,6 @@ print(parsed_image_dataset)
 
 for image_features in parsed_image_dataset:
   image_raw = image_features['image/encoded'].numpy()
-  display.display(display.Image(data=image_raw))
+  image = Image.fromarray(tf.image.decode_jpeg(image_raw, channels=3).numpy())
+  plt.imshow(image)
+  plt.show()
