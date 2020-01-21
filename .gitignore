@@ -6,3 +6,4 @@ include
 .idea
 __pycache__
 *.pyc
+out
